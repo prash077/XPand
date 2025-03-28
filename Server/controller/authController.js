@@ -35,13 +35,15 @@ export const register = async (req,res)=>{
             subject: "Welcome to XPand ",
             text: `Your account is verified with email : ${email}`
         }
+        //error check:
+        //console.log(process.env.SMTP_USER);
+        //console.log(process.env.SMTP_PASS);
 
         await transporter.sendMail(mailOptions);
-        
         return res.json({success:true,message:"Sign Up successful"});
 
     } catch (error) {
-        res.json({success:false,meaasge:error.meaasge});
+        res.json({success:false,message:error.message});
     }
 }
 
