@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import userModel from '../models/userModels.js';
+import transporter from '../config/nodeMailer.js';
 
 export const register = async (req,res)=>{
     const {name,email,password} = req.body;
@@ -27,6 +28,15 @@ export const register = async (req,res)=>{
             sameSite : process.env.NODE_ENV === "production" ? 'none':'strict',
             maxAge: 7*24*60*60*1000,
         });
+
+        const mailOptions = {
+            from : process.env.SENDER_MAIL,
+            to : email,
+            subject: "Welcome to XPand ",
+            text: `Your account is verified with email : ${email}`
+        }
+
+        await transporter.sendMail(mailOptions);
         
         return res.json({success:true,message:"Sign Up successful"});
 
