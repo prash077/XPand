@@ -6,7 +6,7 @@ export const register = async (req,res)=>{
     const {name,email,password} = req.body;
 
     if(!name || !email || !password){
-        return res.json({status:failed,message:"Missing Details"});
+        return res.json({success:false,message:"Missing Details"});
     }
 
     try {
@@ -14,10 +14,10 @@ export const register = async (req,res)=>{
         const existingUser = await userModel.findOne({email});
         if(existingUser)
         {
-            return res.json({status:failed,message:"User already exist"});
+            return res.json({success:false,message:"User already exist"});
         }
         const hashPassword = await bcrypt.hash(password,10);
-        const user = new userModel({name,email,hashPassword});
+        const user = new userModel({name,email,password:hashPassword});
         await user.save();
 
         const token = jwt.sign({id : user._id}, process.env.SECRET_KEY, {expiresIn:'7d'});
@@ -28,10 +28,10 @@ export const register = async (req,res)=>{
             maxAge: 7*24*60*60*1000,
         });
         
-        return res.json({status:true,message:"Sign Up successful"});
+        return res.json({success:true,message:"Sign Up successful"});
 
     } catch (error) {
-        res.json({status:failed,meaasge:error.meaasge});
+        res.json({success:false,meaasge:error.meaasge});
     }
 }
 
@@ -39,7 +39,7 @@ export const Login = async (req,res)=>{
     const {email,password} = req.body;
     if(!email || !password)
     {
-        return res.json({status:failed, message:"Missing Details"});
+        return res.json({success:false, message:"Missing Details"});
     }
     
     try {
@@ -47,13 +47,13 @@ export const Login = async (req,res)=>{
         const user = await userModel.findOne({email});
         if(!user)
         {
-            return res.json({status:failed, message:"User Not Found"});
+            return res.json({success:false, message:"User Not Found"});
         }
         const isCorrectPassword = await bcrypt.compare(password, user.password);
 
         if(!isCorrectPassword)
         {
-            return res.json({status:failed,message:"Invalid credentials"});
+            return res.json({success:false,message:"Invalid credentials"});
         }
 
         const token = jwt.sign({id : user._id}, process.env.SECRET_KEY, {expiresIn:'7d'});
@@ -64,10 +64,10 @@ export const Login = async (req,res)=>{
             maxAge: 7*24*60*60*1000,
         });
         
-        return res.json({status:true, message:"Login Successfull"});
+        return res.json({success:true, message:"Login Successfull"});
 
     } catch (error) {
-        return res.json({status:failed, message:error.message});
+        return res.json({success:false, message:error.message});
     }
 }
 
@@ -78,8 +78,8 @@ export const logout = async (req,res)=>{
             secure : process.env.NODE_ENV === "production",
             sameSite : process.env.NODE_ENV === "production" ? 'none':'strict',
         });
-        return res.json({status:failed,message:"Logout Successful!"});
+        return res.json({success:false,message:"Logout Successful!"});
     } catch (error) {
-        return res.json({status:failed, message:error.meaasge});
+        return res.json({success:false, message:error.meaasge});
     }
 }
